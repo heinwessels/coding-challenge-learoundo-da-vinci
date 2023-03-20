@@ -1,9 +1,9 @@
 import random
-from .bot_control import Move
+from ..bot_control import Move
 from enum import Enum
 import numpy as np
 
-DEBUG = True
+DEBUG = False
 
 MOVE_TO_VECTOR = {
     Move.UP: np.array([0, 1],  dtype=np.int16),
