@@ -135,14 +135,42 @@ class LearoundoDaVinci:
                     return None
 
     def move_to_target(self, careful=False):
-        if self.target[0] > self.position[0]:
-            return Move.RIGHT
-        elif self.target[0] < self.position[0]:
-            return Move.LEFT
-        elif self.target[1] > self.position[1]:
-            return Move.UP
+        if not careful:
+            if self.target[0] > self.position[0]:
+                return Move.RIGHT
+            elif self.target[0] < self.position[0]:
+                return Move.LEFT
+            elif self.target[1] > self.position[1]:
+                return Move.UP
+            else:
+                return Move.DOWN
         else:
-            return Move.DOWN
+            # We must remain within the current circle, meaning our
+            # next step must be inside the circle point list
+            assert(self.circle is not None)
+            normalized_position = np.subtract(self.position, self.circle.center)
+            point_list = self.point_lists[self.circle.radius]
+            if self.target[0] > self.position[0] and \
+                    self.position_hash([
+                        normalized_position[0] + 1,
+                        normalized_position[1]
+                    ]) in point_list:
+                return Move.RIGHT
+            elif self.target[0] < self.position[0] and \
+                    self.position_hash([
+                        normalized_position[0] - 1,
+                        normalized_position[1]
+                    ]) in point_list:
+                return Move.LEFT
+            elif self.target[1] > self.position[1] and \
+                    self.position_hash([
+                        normalized_position[0], 
+                        normalized_position[1] + 1
+                    ]) in point_list:
+                return Move.UP
+            else:
+                return Move.DOWN
+            
 
     def find_next_fill_move(self):
         """
@@ -179,7 +207,7 @@ class LearoundoDaVinci:
         # within a circle without stepping outside. We just need
         # to be careful.
         # TODO Be careful
-        return self.move_to_target()
+        return self.move_to_target(careful = True)
 
     def set_state(self, state):
         if DEBUG:
